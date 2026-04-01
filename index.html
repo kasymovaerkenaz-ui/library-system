@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<title>Кітапхана жүйесі</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    text-align: center;
+}
+h1 {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+}
+.menu button {
+    margin: 5px;
+    padding: 10px;
+}
+.section {
+    display: none;
+    margin-top: 20px;
+}
+.active {
+    display: block;
+}
+input {
+    padding: 8px;
+    margin: 5px;
+}
+button {
+    padding: 8px;
+    cursor: pointer;
+}
+.box {
+    background: white;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 Кітапхана ақпараттық жүйесі</h1>
+
+<div class="menu">
+    <button onclick="show('books')">Кітаптар</button>
+    <button onclick="show('readers')">Оқырмандар</button>
+    <button onclick="show('borrow')">Қарыз беру</button>
+</div>
+
+<!-- КІТАПТАР -->
+<div id="books" class="section active">
+    <h2>Кітаптар</h2>
+    <input id="title" placeholder="Атауы">
+    <input id="author" placeholder="Автор">
+    <button onclick="addBook()">Қосу</button>
+
+    <div class="box" id="bookList"></div>
+</div>
+
+<!-- ОҚЫРМАНДАР -->
+<div id="readers" class="section">
+    <h2>Оқырмандар</h2>
+    <input id="readerName" placeholder="Аты">
+    <button onclick="addReader()">Тіркеу</button>
+
+    <div class="box" id="readerList"></div>
+</div>
+
+<!-- ҚАРЫЗ -->
+<div id="borrow" class="section">
+    <h2>Қарыз беру</h2>
+
+    <select id="bookSelect"></select>
+    <select id="readerSelect"></select>
+
+    <button onclick="borrowBook()">Кітап беру</button>
+
+    <div class="box" id="borrowList"></div>
+</div>
+
+<script>
+let books = [];
+let readers = [];
+let borrows = [];
+
+function show(section) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.getElementById(section).classList.add("active");
+}
+
+// КІТАП
+function addBook() {
+    let title = document.getElementById("title").value;
+    let author = document.getElementById("author").value;
+
+    if (!title || !author) return alert("Толтыр!");
+
+    books.push({ title, author, available: true });
+    displayBooks();
+    updateSelects();
+}
+
+function displayBooks() {
+    let list = document.getElementById("bookList");
+    list.innerHTML = "";
+
+    books.forEach((b, i) => {
+        list.innerHTML += `
+        <p>${b.title} - ${b.author} 
+        [${b.available ? "✔️" : "❌"}]
+        </p>`;
+    });
+}
+
+// ОҚЫРМАН
+function addReader() {
+    let name = document.getElementById("readerName").value;
+    if (!name) return;
+
+    readers.push({ name });
+    displayReaders();
+    updateSelects();
+}
+
+function displayReaders() {
+    let list = document.getElementById("readerList");
+    list.innerHTML = "";
+
+    readers.forEach(r => {
+        list.innerHTML += `<p>${r.name}</p>`;
+    });
+}
+
+// SELECT UPDATE
+function updateSelects() {
+    let bookSel = document.getElementById("bookSelect");
+    let readerSel = document.getElementById("readerSelect");
+
+    bookSel.innerHTML = "";
+    readerSel.innerHTML = "";
+
+    books.forEach((b, i) => {
+        if (b.available)
+            bookSel.innerHTML += `<option value="${i}">${b.title}</option>`;
+    });
+
+    readers.forEach((r, i) => {
+        readerSel.innerHTML += `<option value="${i}">${r.name}</option>`;
+    });
+}
+
+// ҚАРЫЗ
+function borrowBook() {
+    let bookIndex = document.getElementById("bookSelect").value;
+    let readerIndex = document.getElementById("readerSelect").value;
+
+    if (bookIndex === "") return;
+
+    books[bookIndex].available = false;
+
+    borrows.push({
+        book: books[bookIndex].title,
+        reader: readers[readerIndex].name
+    });
+
+    displayBorrows();
+    displayBooks();
+    updateSelects();
+}
+
+function displayBorrows() {
+    let list = document.getElementById("borrowList");
+    list.innerHTML = "";
+
+    borrows.forEach(b => {
+        list.innerHTML += `<p>${b.book} → ${b.reader}</p>`;
+    });
+}
+</script>
+
+</body>
+</html>
